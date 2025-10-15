@@ -1,0 +1,86 @@
+2025-10-15 13:33:33,781 - INFO - ============================================================
+2025-10-15 13:33:33,782 - INFO - STARTING INGESTION PROCESS
+2025-10-15 13:33:33,782 - INFO - ============================================================
+2025-10-15 13:33:33,784 - INFO - Pinecone client initialized successfully.
+2025-10-15 13:33:35,204 - INFO - Pinecone index 'agrosense' already exists.
+2025-10-15 13:33:35,205 - INFO - Found 11 PDF files to process.
+2025-10-15 13:33:35,205 - INFO - [1/11] Processing '11pests1disease.pdf' (Type: LIVESTOCK)...
+2025-10-15 13:33:36,641 - INFO -   ✓ Loaded 9 pages from '11pests1disease.pdf'
+2025-10-15 13:33:36,642 - INFO - [2/11] Processing 'Animal diseases.pdf' (Type: LIVESTOCK)...
+2025-10-15 13:33:37,150 - INFO -   ✓ Loaded 13 pages from 'Animal diseases.pdf'
+2025-10-15 13:33:37,151 - INFO - [3/11] Processing 'animal-health-educational-toolkit_priority-animal-diseases-sheets.pdf' (Type: LIVESTOCK)...
+2025-10-15 13:34:17,506 - INFO -   ✓ Loaded 69 pages from 'animal-health-educational-toolkit_priority-animal-diseases-sheets.pdf'
+2025-10-15 13:34:17,507 - INFO - [4/11] Processing 'cattle-diseases-farmers-guide.pdf' (Type: LIVESTOCK)...
+2025-10-15 13:34:22,027 - INFO -   ✓ Loaded 77 pages from 'cattle-diseases-farmers-guide.pdf'
+2025-10-15 13:34:22,028 - INFO - [5/11] Processing 'CLIMATE SMART AGRICULTURE TRAINER OF TRAINERS MANUAL.pdf' (Type: GENERAL)...
+2025-10-15 13:34:26,094 - INFO -   ✓ Loaded 48 pages from 'CLIMATE SMART AGRICULTURE TRAINER OF TRAINERS MANUAL.pdf'
+2025-10-15 13:34:26,095 - INFO - [6/11] Processing 'Common-Diseases-Chart-1.pdf' (Type: LIVESTOCK)...
+2025-10-15 13:34:26,879 - INFO -   ✓ Loaded 11 pages from 'Common-Diseases-Chart-1.pdf'
+2025-10-15 13:34:26,879 - INFO - [7/11] Processing 'Diseases-of-Field-Crops-and-Their-Management.pdf' (Type: LIVESTOCK)...
+2025-10-15 13:34:29,185 - INFO -   ✓ Loaded 54 pages from 'Diseases-of-Field-Crops-and-Their-Management.pdf'
+2025-10-15 13:34:29,186 - INFO - [8/11] Processing 'KALRO-KCEP Maize Extension and Training  Manual_04042016.pdf' (Type: CROP)...
+2025-10-15 13:34:29,188 - WARNING - Ignoring wrong pointing object 29 0 (offset 0)
+2025-10-15 13:34:29,189 - WARNING - Ignoring wrong pointing object 31 0 (offset 0)
+2025-10-15 13:34:29,190 - WARNING - Ignoring wrong pointing object 71 0 (offset 0)
+2025-10-15 13:34:30,449 - INFO -   ✓ Loaded 18 pages from 'KALRO-KCEP Maize Extension and Training  Manual_04042016.pdf'
+2025-10-15 13:34:30,451 - INFO - [9/11] Processing 'Kenya-Potato-Guide-0821-.pdf' (Type: CROP)...
+2025-10-15 13:34:41,226 - INFO -   ✓ Loaded 130 pages from 'Kenya-Potato-Guide-0821-.pdf'
+2025-10-15 13:34:41,227 - INFO - [10/11] Processing 'MAIZE FERTILIZERS RECOMMENDATIONS FOR KENYA-FINAL-091216.pdf' (Type: CROP)...
+2025-10-15 13:34:43,781 - INFO -   ✓ Loaded 75 pages from 'MAIZE FERTILIZERS RECOMMENDATIONS FOR KENYA-FINAL-091216.pdf'
+2025-10-15 13:34:43,781 - INFO - [11/11] Processing 'Weed management in coffee 2.pdf' (Type: CROP)...
+2025-10-15 13:34:44,262 - INFO -   ✓ Loaded 12 pages from 'Weed management in coffee 2.pdf'
+2025-10-15 13:34:44,262 - INFO - Successfully loaded 516 pages from 11 PDFs.
+2025-10-15 13:34:44,262 - INFO - Splitting documents into chunks (size=1024, overlap=200)...
+2025-10-15 13:34:44,347 - INFO - Created 1069 total chunks.
+2025-10-15 13:34:44,348 - INFO - Initializing Cohere embeddings model: embed-english-v3.0...
+2025-10-15 13:34:45,481 - INFO - Upserting 1069 chunks in 11 batches (batch_size=100)...
+2025-10-15 13:34:45,481 - INFO - Processing batch 1/11 (100 chunks)...
+2025-10-15 13:34:47,264 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:34:47,608 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:34:54,024 - INFO -   ✓ Batch 1 upserted successfully.
+2025-10-15 13:34:55,025 - INFO - Processing batch 2/11 (100 chunks)...
+2025-10-15 13:34:58,888 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:34:59,413 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:35:06,620 - INFO -   ✓ Batch 2 upserted successfully.
+2025-10-15 13:35:07,621 - INFO - Processing batch 3/11 (100 chunks)...
+2025-10-15 13:35:19,737 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:35:20,108 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:35:27,485 - INFO -   ✓ Batch 3 upserted successfully.
+2025-10-15 13:35:28,486 - INFO - Processing batch 4/11 (100 chunks)...
+2025-10-15 13:35:31,907 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:35:32,300 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:35:40,236 - INFO -   ✓ Batch 4 upserted successfully.
+2025-10-15 13:35:41,237 - INFO - Processing batch 5/11 (100 chunks)...
+2025-10-15 13:35:43,058 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:35:43,503 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:35:50,026 - INFO -   ✓ Batch 5 upserted successfully.
+2025-10-15 13:35:51,027 - INFO - Processing batch 6/11 (100 chunks)...
+2025-10-15 13:35:55,445 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:35:55,917 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:02,197 - INFO -   ✓ Batch 6 upserted successfully.
+2025-10-15 13:36:03,198 - INFO - Processing batch 7/11 (100 chunks)...
+2025-10-15 13:36:06,927 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:07,281 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:13,268 - INFO -   ✓ Batch 7 upserted successfully.
+2025-10-15 13:36:14,269 - INFO - Processing batch 8/11 (100 chunks)...
+2025-10-15 13:36:19,241 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:19,409 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:25,342 - INFO -   ✓ Batch 8 upserted successfully.
+2025-10-15 13:36:26,343 - INFO - Processing batch 9/11 (100 chunks)...
+2025-10-15 13:36:28,074 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:29,192 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:35,733 - INFO -   ✓ Batch 9 upserted successfully.
+2025-10-15 13:36:36,735 - INFO - Processing batch 10/11 (100 chunks)...
+2025-10-15 13:36:38,674 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:39,379 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:45,716 - INFO -   ✓ Batch 10 upserted successfully.
+2025-10-15 13:36:46,717 - INFO - Processing batch 11/11 (69 chunks)...
+2025-10-15 13:36:48,668 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:36:53,930 - INFO -   ✓ Batch 11 upserted successfully.
+2025-10-15 13:36:53,930 - INFO - ============================================================
+2025-10-15 13:36:53,931 - INFO - INGESTION SUMMARY
+2025-10-15 13:36:53,931 - INFO - Total chunks: 1069
+2025-10-15 13:36:53,932 - INFO - Successful batches: 11/11
+2025-10-15 13:36:53,933 - INFO - Failed batches: 0/11
+2025-10-15 13:36:53,933 - INFO - ✅ Ingestion complete. All data is now searchable in Pinecone.
+2025-10-15 13:36:53,934 - INFO - ============================================================

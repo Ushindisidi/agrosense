@@ -1,0 +1,9 @@
+python-dotenv
+langchain
+langchain-community
+langchain-core
+pinecone-client
+langchain-pinecone
+langchain-cohere
+pypdf
+cohere

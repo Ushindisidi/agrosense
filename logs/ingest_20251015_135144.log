@@ -1,0 +1,76 @@
+2025-10-15 13:51:44,678 - INFO - ============================================================
+2025-10-15 13:51:44,679 - INFO - 🌾 AGROSENSE VECTOR STORE TOOL
+2025-10-15 13:51:44,680 - INFO - ============================================================
+2025-10-15 13:51:56,614 - INFO - 📦 Index 'agrosense' info:
+2025-10-15 13:51:56,614 - INFO - → Vector count: 3207
+2025-10-15 13:51:56,615 - INFO - → Namespaces: {'': {'vector_count': 3207}}
+2025-10-15 13:51:57,758 - INFO - 
+🧠 Enter your question below to query the knowledge base.
+2025-10-15 13:51:57,758 - INFO - Type 'exit' to quit.
+
+2025-10-15 13:52:15,529 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:52:16,182 - INFO - 
+=== TOP MATCHES ===
+2025-10-15 13:52:16,183 - INFO - 
+📄 cattle-diseases-farmers-guide.pdf (Page 29.0) | Type: LIVESTOCK | Score: 0.6628
+2025-10-15 13:52:16,183 - INFO - Content: Cattle Diseases  | The Farmers’ Guide  |  1st edition  |  April 2023
+27
+Bovine respiratory disease (BRD, ‘shipping fever’)
+Treatment
+• Veterinary care — systemic 
+antibiotics and non-steroidal anti-
+inflammatory drugs.
+• Treatment — administer injectable 
+Vitamin C.
+• Management and environment — 
+isolate affected cattle, protect them 
+from extreme conditions and provide 
+them with water and feed....
+2025-10-15 13:52:16,186 - INFO - 
+📄 cattle-diseases-farmers-guide.pdf (Page 29.0) | Type: LIVESTOCK | Score: 0.6628
+2025-10-15 13:52:16,187 - INFO - Content: Cattle Diseases  | The Farmers’ Guide  |  1st edition  |  April 2023
+27
+Bovine respiratory disease (BRD, ‘shipping fever’)
+Treatment
+• Veterinary care — systemic 
+antibiotics and non-steroidal anti-
+inflammatory drugs.
+• Treatment — administer injectable 
+Vitamin C.
+• Management and environment — 
+isolate affected cattle, protect them 
+from extreme conditions and provide 
+them with water and feed....
+2025-10-15 13:52:16,191 - INFO - 
+📄 cattle-diseases-farmers-guide.pdf (Page 29.0) | Type: LIVESTOCK | Score: 0.6628
+2025-10-15 13:52:16,192 - INFO - Content: Cattle Diseases  | The Farmers’ Guide  |  1st edition  |  April 2023
+27
+Bovine respiratory disease (BRD, ‘shipping fever’)
+Treatment
+• Veterinary care — systemic 
+antibiotics and non-steroidal anti-
+inflammatory drugs.
+• Treatment — administer injectable 
+Vitamin C.
+• Management and environment — 
+isolate affected cattle, protect them 
+from extreme conditions and provide 
+them with water and feed....
+2025-10-15 13:52:16,196 - INFO - ==================================================
+2025-10-15 13:52:34,414 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-15 13:52:34,677 - INFO - 
+=== TOP MATCHES ===
+2025-10-15 13:52:34,678 - INFO - 
+📄 KALRO-KCEP Maize Extension and Training  Manual_04042016.pdf (Page 16.0) | Type: CROP | Score: 0.6044
+2025-10-15 13:52:34,679 - INFO - Content: 11	  
+2.5 Mould and aflatoxin control Aflatoxin in maize is caused by moulds (Aspergillus species). Cooking or heating cannot destroy aflatoxins. The only way is to dry maize grain quickly after harvest to moisture levels of between 12 and 15% and ensure good ventilation.   2.6 Utilization and value addition 1. The grains are ground to produce maize ﬂour and it is also consumed as a food grain fr...
+2025-10-15 13:52:34,680 - INFO - 
+📄 KALRO-KCEP Maize Extension and Training  Manual_04042016.pdf (Page 16.0) | Type: CROP | Score: 0.6044
+2025-10-15 13:52:34,680 - INFO - Content: 11	  
+2.5 Mould and aflatoxin control Aflatoxin in maize is caused by moulds (Aspergillus species). Cooking or heating cannot destroy aflatoxins. The only way is to dry maize grain quickly after harvest to moisture levels of between 12 and 15% and ensure good ventilation.   2.6 Utilization and value addition 1. The grains are ground to produce maize ﬂour and it is also consumed as a food grain fr...
+2025-10-15 13:52:34,681 - INFO - 
+📄 KALRO-KCEP Maize Extension and Training  Manual_04042016.pdf (Page 16.0) | Type: CROP | Score: 0.6044
+2025-10-15 13:52:34,682 - INFO - Content: 11	  
+2.5 Mould and aflatoxin control Aflatoxin in maize is caused by moulds (Aspergillus species). Cooking or heating cannot destroy aflatoxins. The only way is to dry maize grain quickly after harvest to moisture levels of between 12 and 15% and ensure good ventilation.   2.6 Utilization and value addition 1. The grains are ground to produce maize ﬂour and it is also consumed as a food grain fr...
+2025-10-15 13:52:34,683 - INFO - ==================================================
+2025-10-15 13:52:45,076 - INFO - Goodbye! 👋
