@@ -1,128 +1,122 @@
-# 🌾 AgroSense System Architecture
+# AgroSense System Blueprint 
 
-## Overview
+## 🔍 System Overview
 
-The **AgroSense Multi-Asset Advisory System** is an intelligent agriculture assistant that integrates **multi-agent reasoning**, **Retrieval-Augmented Generation (RAG)**, and **workflow automation** to provide farmers with timely and localized insights.
+AgroSense is an **AI-powered, multi-agent precision agriculture system** built on a **Hierarchical Multi-Agent Architecture** orchestrated by **CrewAI** and served via **FastAPI**. The system integrates **Retrieval-Augmented Generation (RAG)** using **Pinecone** for vector storage and **Cohere embeddings** for semantic similarity, enabling domain-specific agricultural intelligence. Contextual awareness is achieved through the **Model Context Protocol (MCP)**, which ensures consistent and dynamic data sharing among agents, providing region-aware, crop- or livestock-specific insights.
 
-It helps diagnose **crop and livestock health issues**, provides **context-aware recommendations** using regional agricultural data, and can trigger **automated alerts** (SMS, email, or logs) for critical events such as disease detection.
+### 🌾 Core Goals
 
----
+* Deliver **localized**, data-driven agricultural recommendations.
+* Integrate **real-time weather and price data** for context-aware decision-making.
+* Enable **automated workflows** via n8n for alerting and reporting.
+* Maintain a modular, scalable, and API-ready design suitable for enterprise deployment.
 
-### ⚙️ Core Workflow Summary
+### 🧠 Core Technologies
 
-1. **Farmer Query (Frontend)**  
-   Farmers submit questions (e.g., “My cow has a fever in Nakuru”) through the Streamlit web interface.
-
-2. **FastAPI Backend**  
-   The backend receives and validates the query, then sends it to the **Supervisor Agent** which coordinates agent collaboration.
-
-3. **Multi-Agent System (MCP-Coordinated)**  
-   - **Orchestrator Agent** classifies the query (Crop, Livestock, Finance).  
-   - **Agri-Knowledge Agent** retrieves relevant context from the **Vector Database** (documents tagged by `asset_type` and `region`).  
-   - **Crop Diagnostic Agent** or **Livestock Vet Agent** reasons on the retrieved data to form a diagnosis.  
-   - **Weather/Price Agent** adds contextual information (rainfall, commodity prices).  
-   - **Action Agent** prepares an actionable payload for automation.
-
-4. **Data & Intelligence Layer**  
-   Agricultural documents are uploaded via `/upload-doc`, tagged with metadata, and stored in **Chroma/Pinecone** for efficient vector retrieval.
-
-5. **Automation (n8n Workflow)**  
-   When the Action Agent identifies a critical condition, it sends a payload to `/trigger-action`, which invokes an **n8n workflow**:
-   - Sends SMS alerts via Twilio/WhatsApp  
-   - Logs the event in Google Sheets or a database  
-   - Notifies local veterinarians or extension officers by email
-
-6. **Response Delivery**  
-   The Supervisor compiles and formats the agents’ reasoning into a clear, actionable response displayed back to the farmer on the frontend.
+| Layer              | Technology                            | Role                                                          |
+| ------------------ | ------------------------------------- | ------------------------------------------------------------- |
+| Orchestration      | **CrewAI**                            | Manages and coordinates multiple agents                       |
+| Backend API        | **FastAPI**                           | RESTful API for request routing and agent interfacing         |
+| Context Management | **Model Context Protocol (MCP)**      | Enables shared contextual memory between agents               |
+| Retrieval          | **Pinecone Vector DB**                | Vector-based document retrieval for RAG                       |
+| Embeddings         | **Cohere**                            | Semantic embedding generation for document vectors            |
+| Frontend           | **Streamlit**                         | Farmer-facing UI for queries and results display              |
+| Automation         | **n8n**                               | Triggers alerts or workflows for critical agricultural events |
+| Data Sources       | **Local PDFs, Weather & Market APIs** | Provides raw and contextual data                              |
 
 ---
 
-## 🧠 System Flowchart
+## ⚙️ System Flow (Mermaid Diagram)
 
 ```mermaid
-flowchart TD
-    %% ========= FRONTEND =========
-    subgraph UI["🌾 Streamlit Frontend (Farmer Interface)"]
-        UIQ["Farmer Query Input\n(e.g. 'My cow has a fever in Nakuru')"]
-        UIQ -->|POST /ask| API
+graph TD
+    A[👨‍🌾 User Query via Streamlit UI] -->|Text + Region| B[🌐 FastAPI Router]
+    B --> C[🧩 CrewAI Orchestrator Agent]
+
+    %% MCP CONTEXT MANAGEMENT
+    C -->|Initialize Context| D[(🧠 MCP Client)]
+    D -->|Stores| D1[Query Text]
+    D -->|Stores| D2[Region (e.g., Nakuru)]
+    D -->|Stores| D3[Asset Type (Crop/Livestock)]
+
+    %% AGENTS FLOW
+    C --> E1[📚 Agri-Knowledge Agent]
+    E1 -->|RAG Search (by Asset Type)| F1[(🔎 Pinecone Vector DB)]
+    F1 -->|Cohere Embeddings + Context| D
+
+    C --> E2[🌦️ Weather/Price Agent]
+    E2 -->|Region-based API Calls| F2[(☁️ Weather + Market APIs)]
+    F2 -->|Regional Data| D
+
+    C --> E3[🧬 Diagnostic Agent]
+    E3 -->|Reads from MCP (Query, Knowledge, Regional Data)| D
+    E3 -->|Generates| G1[💡 Localized Recommendation]
+    G1 --> D
+
+    C --> E4[⚙️ Action Agent]
+    E4 -->|Checks Critical Conditions| D
+    E4 -->|Trigger Alert if Severe| H[(🚨 n8n Workflow Automation)]
+
+    %% OUTPUT
+    D -->|Final Structured Response| I[🪶 Streamlit UI Output]
+
+    %% STORAGE AND LOGGING
+    subgraph Subsystem: Data & Logging
+        L1[📁 Knowledge Base (Raw PDFs)]
+        L2[📊 Pinecone Vector Index]
+        L3[🧾 ingest.py (ETL & Logging)]
     end
 
-    %% ========= BACKEND CORE =========
-    subgraph Backend["🚀 FastAPI Backend"]
-        API["/ask Endpoint\nReceives query → validates → sends to Orchestrator"]
-        MCP["MCP Client\n(Session & Shared Context)\n(session_id, asset_type, region)"]
-        Supervisor["Supervisor / Crew Manager\nCoordinates Agent Collaboration"]
-        ActionAPI["/trigger-action Endpoint\nReceives ActionAgent payload → calls n8n"]
-    end
+    L1 --> L2
+    L2 --> F1
+    L3 --> L2
 
-    %% ========= MULTI-AGENT CORE =========
-    subgraph MultiAgent["🧠 AgroSense Multi-Agent System"]
-        Orchestrator["Orchestrator Agent (Manager)\n- Classifies intent (Crop/Livestock/Finance)\n- Sets MCP context\n- Routes query"]
-        AgriKnowledge["Agri-Knowledge Agent (RAG Specialist)\n- Retrieves from Vector DB\n- Synthesizes background info"]
-        CropAgent["Crop Diagnostic Agent\n- Diagnoses plant diseases, pests, deficiencies"]
-        LivestockAgent["Livestock Vet Agent\n- Diagnoses animal health issues"]
-        WeatherPrice["Weather/Price Agent\n- Fetches real-time weather & market data"]
-        ActionAgent["Action Agent\n- Prepares actionable alerts\n- Calls /trigger-action"]
-    end
+    %% ANNOTATIONS
+    style D fill:#d8f3dc,stroke:#2d6a4f,stroke-width:2px
+    style F1 fill:#cdeaff,stroke:#0077b6,stroke-width:2px
+    style F2 fill:#fde2e4,stroke:#c1121f,stroke-width:2px
+    style G1 fill:#fff3b0,stroke:#ffb703,stroke-width:2px
+```
 
-    %% ========= DATA SYSTEMS =========
-    subgraph DataLayer["📚 Data & Intelligence Layer"]
-        VectorDB["Vector Database (Chroma / Pinecone)\nChunked Agricultural PDFs\nMetadata: asset_type, region"]
-        DocsUpload["/upload-doc Endpoint\nRequires asset_type + region metadata"]
-    end
+---
 
-    %% ========= AUTOMATION =========
-    subgraph Automation["⚙️ n8n Workflow Automation"]
-        N8N["n8n Webhook Trigger\n(Receives FastAPI payload)"]
-        Branch["IF Node: Check action_type"]
-        SMS["Twilio/WhatsApp Node\nSend critical alert SMS"]
-        Sheet["Google Sheets / DB Node\nLog alert"]
-        Email["Email Node\nNotify vet/extension officer"]
-    end
+## 🧩 Agent Responsibilities Summary
 
-    %% ========= FLOW CONNECTIONS =========
-    %% Frontend to Backend
-    API --> Supervisor
-    Supervisor --> Orchestrator
-    Orchestrator --> MCP
-    Orchestrator --> AgriKnowledge
-    Orchestrator -->|Crop| CropAgent
-    Orchestrator -->|Livestock| LivestockAgent
-    Orchestrator -->|Finance| WeatherPrice
+| Agent                    | Responsibility                                             | Tool(s)                 | Writes to MCP             |
+| ------------------------ | ---------------------------------------------------------- | ----------------------- | ------------------------- |
+| **Orchestrator Agent**   | Classifies intent, identifies asset type, initializes MCP  | None                    | Query, Asset Type, Region |
+| **Agri-Knowledge Agent** | Retrieves relevant documents using RAG (Pinecone + Cohere) | `rag_tool.py`           | Retrieved Context         |
+| **Weather/Price Agent**  | Fetches real-time localized data                           | `weather_price_tool.py` | Regional Data             |
+| **Diagnostic Agent**     | Synthesizes advice using all MCP data                      | Internal logic          | Final Advice              |
+| **Action Agent**         | Automates responses for critical alerts                    | `n8n_alert_tool.py`     | Trigger Payload           |
 
-    %% RAG retrieval
-    AgriKnowledge -->|"Query by asset_type & region"| VectorDB
-    VectorDB --> AgriKnowledge
-    DocsUpload --> VectorDB
+---
 
-    %% Reasoning flow
-    AgriKnowledge --> CropAgent
-    AgriKnowledge --> LivestockAgent
-    WeatherPrice --> LivestockAgent
-    WeatherPrice --> CropAgent
+## 🧠 Context Management Logic (MCP)
 
-    %% Diagnostic to Action
-    CropAgent --> ActionAgent
-    LivestockAgent --> ActionAgent
-    ActionAgent --> ActionAPI
-    ActionAPI --> N8N
-    N8N --> Branch
-    Branch -->|EMERGENCY_VET_ALERT| SMS
-    Branch -->|EMERGENCY_VET_ALERT| Sheet
-    Branch -->|EMERGENCY_VET_ALERT| Email
+* The **MCP Client** serves as a centralized memory bus.
+* It stores: `query`, `asset_type`, `region`, `retrieved_context`, and `regional_data`.
+* Each agent reads/writes to the MCP without cross-dependencies, ensuring modularity.
+* Context persists throughout the pipeline for multi-step reasoning and transparency.
 
-    %% Response back to user
-    Supervisor -->|"Final formatted response"| UIQ
+---
 
-    %% ========= STYLE =========
-    classDef agents fill:#e6f7ff,stroke:#0094c6,stroke-width:1px,color:#003049;
-    classDef backend fill:#fff8e1,stroke:#e0a800,stroke-width:1px,color:#4b3832;
-    classDef data fill:#e7ffe7,stroke:#5a995a,stroke-width:1px,color:#003300;
-    classDef automation fill:#ffe5e5,stroke:#d64545,stroke-width:1px,color:#330000;
-    classDef ui fill:#f0f9ff,stroke:#3399cc,stroke-width:1px,color:#003344;
 
-    class UI,UIQ ui;
-    class Backend,API,MCP,Supervisor,ActionAPI backend;
-    class MultiAgent,Orchestrator,AgriKnowledge,CropAgent,LivestockAgent,WeatherPrice,ActionAgent agents;
-    class DataLayer,VectorDB,DocsUpload data;
-    class Automation,N8N,Branch,SMS,Sheet,Email automation;
+## 🧾 Example Query Flow
+
+> **Farmer Input:** "What is affecting my maize crops in Nakuru?"
+>
+> **System Steps:**
+>
+> 1. FastAPI receives query + region.
+> 2. Orchestrator identifies asset_type = Crop.
+> 3. MCP initialized with query + region.
+> 4. RAG fetches relevant maize-related documents.
+> 5. Weather/Price Agent collects Nakuru-specific weather data.
+> 6. Diagnostic Agent fuses both for a context-aware response.
+> 7. If disease outbreak is severe → Action Agent triggers n8n alert.
+> 8. Streamlit UI displays final, localized advice to the farmer.
+
+---
+
+✅ **Result:** A scalable, intelligent, and explainable agricultural advisory ecosystem — merging **AI reasoning**, **real-time data**, and **modular multi-agent collaboration** under one cohesive architecture.
