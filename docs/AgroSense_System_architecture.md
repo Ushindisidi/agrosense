@@ -33,45 +33,54 @@ graph TD
     A[👨‍🌾 User Query via Streamlit UI] -->|Text + Region| B[🌐 FastAPI Router]
     B --> C[🧩 CrewAI Orchestrator Agent]
 
-    %% MCP CONTEXT MANAGEMENT
-    C -->|Initialize Context| D[(🧠 MCP Client)]
-    D -->|Stores| D1[Query Text]
-    D -->|Stores| D2[Region (e.g., Nakuru)]
-    D -->|Stores| D3[Asset Type (Crop/Livestock)]
+    subgraph MCP_Context[MCP Context Management]
+        D[(🧠 MCP Client)]
+        D1[Query Text]
+        D2[Region e.g. Nakuru]
+        D3[Asset Type Crop/Livestock]
+    end
 
-    %% AGENTS FLOW
-    C --> E1[📚 Agri-Knowledge Agent]
-    E1 -->|RAG Search (by Asset Type)| F1[(🔎 Pinecone Vector DB)]
+    C -->|Initialize Context| D
+    D -->|Stores| D1
+    D -->|Stores| D2
+    D -->|Stores| D3
+
+    subgraph Agents[Agent Processing]
+        E1[📚 Agri-Knowledge Agent]
+        E2[🌦️ Weather/Price Agent]
+        E3[🧬 Diagnostic Agent]
+        E4[⚙️ Action Agent]
+    end
+
+    C --> E1
+    E1 -->|RAG Search by Asset Type| F1[(🔎 Pinecone Vector DB)]
     F1 -->|Cohere Embeddings + Context| D
 
-    C --> E2[🌦️ Weather/Price Agent]
+    C --> E2
     E2 -->|Region-based API Calls| F2[(☁️ Weather + Market APIs)]
     F2 -->|Regional Data| D
 
-    C --> E3[🧬 Diagnostic Agent]
-    E3 -->|Reads from MCP (Query, Knowledge, Regional Data)| D
+    C --> E3
+    E3 -->|Reads from MCP Query Knowledge Regional Data| D
     E3 -->|Generates| G1[💡 Localized Recommendation]
     G1 --> D
 
-    C --> E4[⚙️ Action Agent]
+    C --> E4
     E4 -->|Checks Critical Conditions| D
     E4 -->|Trigger Alert if Severe| H[(🚨 n8n Workflow Automation)]
 
-    %% OUTPUT
     D -->|Final Structured Response| I[🪶 Streamlit UI Output]
 
-    %% STORAGE AND LOGGING
-    subgraph Subsystem: Data & Logging
-        L1[📁 Knowledge Base (Raw PDFs)]
+    subgraph Storage[Data & Logging]
+        L1[📁 Knowledge Base Raw PDFs]
         L2[📊 Pinecone Vector Index]
-        L3[🧾 ingest.py (ETL & Logging)]
+        L3[🧾 ingest.py ETL & Logging]
     end
 
     L1 --> L2
     L2 --> F1
     L3 --> L2
 
-    %% ANNOTATIONS
     style D fill:#d8f3dc,stroke:#2d6a4f,stroke-width:2px
     style F1 fill:#cdeaff,stroke:#0077b6,stroke-width:2px
     style F2 fill:#fde2e4,stroke:#c1121f,stroke-width:2px
