@@ -1,0 +1,50 @@
+2025-10-16 13:01:21,977 - INFO - \U0001f50d Initializing RAGTool for live test execution...
+2025-10-16 13:01:22,285 - INFO - \u2705 Loaded Pinecone Index: agrosense in us-east-1
+2025-10-16 13:01:22,287 - INFO - \u2705 Using Model: gemini/gemini-1.5-flash
+2025-10-16 13:01:22,288 - INFO - RAGTool initialized successfully.
+2025-10-16 13:05:57,737 - INFO - \U0001f9e0 Initializing AgroSense RAGTool...
+2025-10-16 13:05:57,744 - ERROR - \u274c RAGTool initialization or test run failed.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\agrosense\src\agrosense\tools\rag_tool.py", line 224, in <module>
+    tool = RAGTool()
+           ^^^^^^^^^
+  File "C:\Users\Admin\Desktop\agrosense\src\agrosense\tools\rag_tool.py", line 60, in __init__
+    self.mcp_client = mcp_client
+    ^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\miniconda3\envs\Agrisense\Lib\site-packages\pydantic\main.py", line 1032, in __setattr__
+    elif (setattr_handler := self._setattr_handler(name, value)) is not None:
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\miniconda3\envs\Agrisense\Lib\site-packages\pydantic\main.py", line 1079, in _setattr_handler
+    raise ValueError(f'"{cls.__name__}" object has no field "{name}"')
+ValueError: "RAGTool" object has no field "mcp_client"
+2025-10-16 13:08:47,443 - INFO - \U0001f9e0 Initializing AgroSense RAGTool...
+2025-10-16 13:08:47,450 - ERROR - \u274c RAGTool initialization or test run failed.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\agrosense\src\agrosense\tools\rag_tool.py", line 213, in <module>
+    tool = RAGTool()
+           ^^^^^^^^^
+  File "C:\Users\Admin\Desktop\agrosense\src\agrosense\tools\rag_tool.py", line 64, in __init__
+    self.pinecone_api_key = os.getenv("PINECONE_API_KEY")
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\miniconda3\envs\Agrisense\Lib\site-packages\pydantic\main.py", line 1032, in __setattr__
+    elif (setattr_handler := self._setattr_handler(name, value)) is not None:
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\miniconda3\envs\Agrisense\Lib\site-packages\pydantic\main.py", line 1079, in _setattr_handler
+    raise ValueError(f'"{cls.__name__}" object has no field "{name}"')
+ValueError: "RAGTool" object has no field "pinecone_api_key"
+2025-10-16 19:14:24,009 - INFO - \U0001f9e0 Initializing AgroSense RAGTool...
+2025-10-16 19:14:27,461 - INFO - \u2705 Connected to Pinecone index: agrosense
+2025-10-16 19:14:28,087 - INFO - \u2705 Cohere client initialized successfully.
+2025-10-16 19:14:28,089 - INFO - \U0001f50d RAG search initiated for query: 'Best fertilizer for maize in dry regions'
+2025-10-16 19:14:28,089 - INFO - Enhanced query: maize Best fertilizer for maize in dry regions nutrition fertilizer feeding management
+2025-10-16 19:14:28,659 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:14:28,702 - INFO - \u2705 Embedding generated successfully.
+2025-10-16 19:14:30,764 - WARNING - No relevant documents found.
+2025-10-16 19:18:24,403 - INFO - \U0001f9e0 Initializing AgroSense RAGTool...
+2025-10-16 19:18:26,942 - INFO - \u2705 Connected to Pinecone index: agrosense
+2025-10-16 19:18:28,727 - INFO - \u2705 Cohere client initialized successfully.
+2025-10-16 19:18:28,728 - INFO - \U0001f50d RAG search initiated for query: 'Best fertilizer for maize in dry regions'
+2025-10-16 19:18:28,728 - INFO - Enhanced query: maize Best fertilizer for maize in dry regions nutrition fertilizer feeding management
+2025-10-16 19:18:29,049 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:18:29,073 - INFO - \u2705 Embedding generated successfully.
+2025-10-16 19:18:30,838 - WARNING - No relevant documents found.
