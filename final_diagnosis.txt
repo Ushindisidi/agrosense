@@ -1,0 +1,47 @@
+## Diagnosis: East Coast Fever (Theileria parva)  
+**Issue:** Tick-borne disease caused by the parasite Theileria parva.  
+**Severity Level:** High (if untreated, mortality rates can exceed 90%).  
+**Confidence Level:** Medium (based on symptoms like high fever, anemia, and swelling of lymph nodes; confirm with blood tests and tick identification).  
+
+## Immediate Actions:  
+1. **Isolate Affected Cattle:** Quarantine sick animals to prevent further spread.  
+2. **Consult a Veterinarian:** Contact the nearest veterinary office in Mombasa for a confirmed diagnosis and treatment plan.  
+3. **Administer Treatment:** Follow veterinarian-prescribed antiparasitic drugs (e.g., parvaquone) and supportive care (e.g., fluids, anti-inflammatory medications).  
+4. **Tick Control:** Apply acaricides (e.g., amitraz, cypermethrin) to all cattle to eliminate ticks.  
+5. **Monitor Herd:** Regularly check for symptoms in other animals and treat as needed.  
+
+**Required Inputs/Materials:**  
+- Acaricides (e.g., amitraz, cypermethrin)  
+- Antiparasitic drugs (e.g., parvaquone)  
+- Veterinary consultation  
+- Quarantine facilities  
+
+**Timeline for Action:**  
+- Immediate: Isolate affected cattle and consult a veterinarian.  
+- Within 24 hours: Begin treatment and tick control measures.  
+- Ongoing: Monitor herd for 2-3 weeks.  
+
+## Regional Considerations:  
+- **Weather Impact:** Heavy rainfall and high humidity (80%) create ideal conditions for tick proliferation, increasing disease risk.  
+- **Local Availability:** Acaricides and veterinary services are available in Mombasa, but supply may be limited during the rainy season.  
+- **Market Implications:** Cattle prices are increasing, making prompt treatment crucial to protect investment.  
+
+## Prevention:  
+1. **Regular Tick Control:** Use acaricides every 3-4 weeks during the rainy season.  
+2. **Vaccination:** Implement a vaccination program against East Coast Fever.  
+3. **Quarantine New Animals:** Isolate and inspect new cattle before introducing them to the herd.  
+4. **Pasture Management:** Rotate grazing areas to reduce tick populations.  
+
+## Cost Estimate:  
+- **Treatment Costs:**  
+  - Acaricides: KES 2,000–5,000 per treatment.  
+  - Antiparasitic drugs: KES 1,500–3,000 per animal.  
+  - Veterinary consultation: KES 3,000–5,000.  
+- **Expected Outcomes:** With prompt treatment, survival rates can improve to 50-70%. Early intervention is critical to minimize losses.  
+
+**Final Diagnosis Stored in MCP:**  
+## Diagnosis East Coast Fever (Theileria parva)  
+## Immediate Actions 1. Isolate affected cattle 2. Consult a veterinarian 3. Administer treatment 4. Apply acaricides 5. Monitor herd  
+## Regional Considerations Heavy rainfall and high humidity increase tick proliferation; local acaricides and veterinary services available but may be limited  
+## Prevention Regular tick control, vaccination, quarantine, and pasture management  
+## Cost Treatment costs KES 2,000–5,000 (acaricides), KES 1,500–3,000 (drugs), KES 3,000–5,000 (vet consultation); expected survival rates 50-70% with early intervention
