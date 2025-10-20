@@ -1,0 +1,50 @@
+2025-10-16 20:30:05,619 [INFO] \U0001f680 Starting AgroSenseCrew initialization test...
+2025-10-16 20:30:05,627 [ERROR] \u274c AgroSenseCrew initialization failed: 1 validation error for WeatherPriceTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+2025-10-16 20:30:09,452 [INFO] \u25b6\ufe0f Testing AgroSenseCrew run method...
+2025-10-16 20:30:09,454 [ERROR] \u274c AgroSenseCrew run method failed: 1 validation error for WeatherPriceTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+2025-10-16 20:33:34,618 [INFO] \U0001f680 Starting AgroSenseCrew initialization test...
+2025-10-16 20:33:34,620 [ERROR] \u274c AgroSenseCrew initialization failed: 1 validation error for N8NAlertTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+2025-10-16 20:33:36,600 [INFO] \u25b6\ufe0f Testing AgroSenseCrew run method...
+2025-10-16 20:33:36,603 [ERROR] \u274c AgroSenseCrew run method failed: 1 validation error for N8NAlertTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+2025-10-16 20:36:37,759 [INFO] \U0001f680 Starting AgroSenseCrew initialization test...
+2025-10-16 20:36:37,766 [ERROR] \u274c AgroSenseCrew initialization failed: 1 validation error for N8NAlertTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+2025-10-16 20:36:39,935 [INFO] \u25b6\ufe0f Testing AgroSenseCrew run method...
+2025-10-16 20:36:39,936 [ERROR] \u274c AgroSenseCrew run method failed: 1 validation error for N8NAlertTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+2025-10-16 20:37:50,069 [INFO] \U0001f680 Starting AgroSenseCrew initialization test...
+2025-10-16 20:37:50,070 [ERROR] \u274c AgroSenseCrew initialization failed: 1 validation error for N8NAlertTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+2025-10-16 20:37:51,647 [INFO] \u25b6\ufe0f Testing AgroSenseCrew run method...
+2025-10-16 20:37:51,647 [ERROR] \u274c AgroSenseCrew run method failed: 1 validation error for N8NAlertTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+2025-10-16 20:45:46,278 [INFO] \U0001f680 Starting AgroSenseCrew initialization test...
+2025-10-16 20:45:46,280 [ERROR] \u274c AgroSenseCrew initialization failed: 1 validation error for WeatherPriceTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+2025-10-16 20:45:48,317 [INFO] \u25b6\ufe0f Testing AgroSenseCrew run method...
+2025-10-16 20:45:48,318 [ERROR] \u274c AgroSenseCrew run method failed: 1 validation error for WeatherPriceTool
+mcp_client
+  Field required [type=missing, input_value={}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
