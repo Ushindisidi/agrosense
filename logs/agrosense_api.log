@@ -1,0 +1,25 @@
+2025-10-16 20:05:05,807 - AgroSenseAPI - INFO - AgroSense API Logging Initialized.
+2025-10-16 20:05:16,611 - httpx - INFO - HTTP Request: GET https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json "HTTP/1.1 200 OK"
+2025-10-16 20:05:28,055 - AgroSenseAPI - ERROR - CRITICAL ERROR: Failed to import AgroSenseCrew. Check your project structure and sys.path configuration. Error: attempted relative import beyond top-level package
+2025-10-16 20:05:28,059 - AgroSenseAPI - ERROR - Error initializing AgroSenseCrew globally: name 'AgroSenseCrew' is not defined. Endpoint calls may fail.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\agrosense\src\agrosense\main.py", line 61, in <module>
+    crew_base = AgroSenseCrew()
+                ^^^^^^^^^^^^^
+NameError: name 'AgroSenseCrew' is not defined
+2025-10-16 20:10:43,527 - AgroSenseAPI - INFO - AgroSense API Logging Initialized.
+2025-10-16 20:10:43,530 - AgroSenseAPI - ERROR - CRITICAL ERROR: Failed to import AgroSenseCrew. Check your project structure and sys.path configuration. Error: No module named 'agrosense'
+2025-10-16 20:10:43,533 - AgroSenseAPI - ERROR - Error initializing AgroSenseCrew globally: name 'AgroSenseCrew' is not defined. Endpoint calls may fail.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\agrosense\src\agrosense\main.py", line 63, in <module>
+    crew_base = AgroSenseCrew()
+                ^^^^^^^^^^^^^
+NameError: name 'AgroSenseCrew' is not defined
+2025-10-16 20:17:53,443 - AgroSenseAPI - INFO - AgroSense API Logging Initialized.
+2025-10-16 20:17:53,445 - AgroSenseAPI - ERROR - CRITICAL ERROR: Failed to import AgroSenseCrew. Check your project structure and sys.path configuration. Error: No module named 'agrosense'
+2025-10-16 20:17:53,447 - AgroSenseAPI - ERROR - Error initializing AgroSenseCrew globally: name 'AgroSenseCrew' is not defined. Endpoint calls may fail.
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\agrosense\src\agrosense\main.py", line 63, in <module>
+    crew_base = AgroSenseCrew()
+                ^^^^^^^^^^^^^
+NameError: name 'AgroSenseCrew' is not defined

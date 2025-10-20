@@ -1,0 +1,41 @@
+2025-10-16 19:24:20,686 - INFO - ============================================================
+2025-10-16 19:24:20,687 - INFO - 🌾 AGROSENSE VECTOR STORE TOOL
+2025-10-16 19:24:20,689 - INFO - ============================================================
+2025-10-16 19:24:26,982 - INFO - Pinecone client initialized successfully.
+2025-10-16 19:24:31,231 - INFO - Pinecone index 'agrosense' already exists.
+2025-10-16 19:26:21,846 - WARNING - Ignoring wrong pointing object 29 0 (offset 0)
+2025-10-16 19:26:21,848 - WARNING - Ignoring wrong pointing object 31 0 (offset 0)
+2025-10-16 19:26:21,850 - WARNING - Ignoring wrong pointing object 71 0 (offset 0)
+2025-10-16 19:26:42,501 - INFO - Created 1069 chunks total.
+2025-10-16 19:26:47,831 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:26:48,485 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:26:55,394 - INFO - Batch 1/11 ingested successfully.
+2025-10-16 19:26:57,265 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:26:57,689 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:06,202 - INFO - Batch 2/11 ingested successfully.
+2025-10-16 19:27:07,956 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:08,349 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:16,558 - INFO - Batch 3/11 ingested successfully.
+2025-10-16 19:27:18,733 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:19,110 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:26,224 - INFO - Batch 4/11 ingested successfully.
+2025-10-16 19:27:28,141 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:28,544 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:35,287 - INFO - Batch 5/11 ingested successfully.
+2025-10-16 19:27:39,833 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:39,980 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:48,529 - INFO - Batch 6/11 ingested successfully.
+2025-10-16 19:27:50,305 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:50,414 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:27:58,309 - INFO - Batch 7/11 ingested successfully.
+2025-10-16 19:28:00,213 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:28:00,222 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:28:07,377 - INFO - Batch 8/11 ingested successfully.
+2025-10-16 19:28:09,504 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:28:09,880 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:28:17,144 - INFO - Batch 9/11 ingested successfully.
+2025-10-16 19:28:21,465 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:28:21,662 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:28:31,736 - INFO - Batch 10/11 ingested successfully.
+2025-10-16 19:28:36,004 - INFO - HTTP Request: POST https://api.cohere.com/v1/embed "HTTP/1.1 200 OK"
+2025-10-16 19:28:41,864 - INFO - Batch 11/11 ingested successfully.

@@ -1,17 +1,253 @@
-research_task:
+classify_query_task:
   description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is {current_year}.
+    Analyze the farmer's query: "{query}"
+    From region context: "{region}"
+    Session ID: {session_id}
+    
+    Extract and classify the following:
+    
+    1. ASSET_TYPE: Determine if this is about:
+       - "crop" (maize, wheat, tomatoes, kale, potatoes, coffee, tea, etc.)
+       - "livestock" (cattle, goats, sheep, poultry, pigs, etc.)
+       - "general" (if query is about farming practices not specific to an asset)
+    
+    2. ASSET_NAME: Identify the specific crop or animal mentioned.
+       Examples: "maize", "dairy_cattle", "broiler_chicken", "tomatoes"
+    
+    3. REGION: Extract or infer the location.
+       - Explicit: "in Nakuru", "from Mombasa"
+       - Implicit: Use the provided region context
+       - If not provided, mark as "unknown"
+    
+    4. QUERY_INTENT: Classify what the farmer needs:
+       - "disease_diagnosis" - symptoms, identification
+       - "pest_management" - pest identification, control
+       - "weather_advisory" - planting times, climate concerns
+       - "market_prices" - selling, buying decisions
+       - "general_advice" - best practices, recommendations
+    
+    FEW-SHOT EXAMPLES:
+    
+    Query: "My maize leaves have white spots in Eldoret"
+    Output: {{"asset_type": "crop", "asset_name": "maize", "region": "Eldoret", 
+             "intent": "disease_diagnosis"}}
+    
+    Query: "What is the price of tomatoes today?"
+    Region: "Nairobi"
+    Output: {{"asset_type": "crop", "asset_name": "tomatoes", "region": "Nairobi",
+             "intent": "market_prices"}}
+    
+    Query: "My cows are not eating well"
+    Region: "Nakuru"
+    Output: {{"asset_type": "livestock", "asset_name": "cattle", "region": "Nakuru",
+             "intent": "disease_diagnosis"}}
+    
+    Query: "When should I plant potatoes in Molo?"
+    Output: {{"asset_type": "crop", "asset_name": "potatoes", "region": "Molo",
+             "intent": "weather_advisory"}}
+    
+    CRITICAL: Initialize MCP context with session_id and store all extracted information.
+    
   expected_output: >
-    A list with 10 bullet points of the most relevant information about {topic}
-  agent: researcher
+    A JSON object with routing information stored in MCP:
+    {{
+      "session_id": "generated_uuid",
+      "asset_type": "crop|livestock|general",
+      "asset_name": "specific_name",
+      "region": "location",
+      "intent": "intent_category",
+      "mcp_initialized": true
+    }}
+  agent: orchestrator_agent
+  context: []
 
-reporting_task:
+retrieve_knowledge_task:
   description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
+    Read from MCP context:
+    - asset_type: {mcp.asset_type}
+    - asset_name: {mcp.asset_name}
+    - query_intent: {mcp.metadata.intent}
+    
+    SEARCH STRATEGY:
+    1. Construct semantic search query combining:
+       - Asset name (e.g., "maize")
+       - Intent keywords (e.g., "disease", "pest", "management")
+       - Specific symptoms or issues from original query
+    
+    2. Filter Pinecone results by:
+       - metadata.asset_type == {mcp.asset_type}
+       - Relevance score > 0.7
+    
+    3. Retrieve top 5 most relevant document chunks
+    
+    4. Store in MCP as retrieved_context with:
+       - Document text
+       - Source PDF name
+       - Relevance score
+       - Page number
+    
+    EXAMPLE:
+    For query "maize leaves turning yellow"
+    Search: "maize leaf yellowing chlorosis nitrogen deficiency disease"
+    Filter: asset_type == "crop"
+    
   expected_output: >
-    A fully fledged report with the main topics, each with a full section of information.
-    Formatted as markdown without '```'
-  agent: reporting_analyst
+    List of relevant document chunks stored in MCP context:
+    [
+      {{
+        "text": "chunk content...",
+        "source": "KALRO-Maize-Manual.pdf",
+        "score": 0.89,
+        "page": 45
+      }},
+      ...
+    ]
+  agent: agri_knowledge_agent
+  context: [classify_query_task]
+
+fetch_regional_data_task:
+  description: >
+    Read from MCP context:
+    - region: {mcp.region}
+    - asset_name: {mcp.asset_name}
+    
+    FETCH:
+    1. Weather Data for {mcp.region}:
+       - Current temperature, humidity, rainfall
+       - 7-day forecast
+       - Growing degree days
+       - Drought/flood alerts
+    
+    2. Market Prices:
+       - Current price for {mcp.asset_name} in nearest markets
+       - Price trend (last 30 days)
+       - Market recommendations (buy/sell/hold)
+    
+    3. Seasonal Context:
+       - Current growing season
+       - Optimal planting/harvesting windows
+       - Regional advisories
+    
+    Store all in MCP as regional_data dictionary.
+    
+  expected_output: >
+    Regional data stored in MCP:
+    {{
+      "weather": {{
+        "current": {{"temp": 22, "humidity": 65, "rainfall": 0}},
+        "forecast": [...],
+        "alerts": ["Heavy rainfall expected"]
+      }},
+      "market": {{
+        "current_price": 3500,
+        "trend": "increasing",
+        "recommendation": "hold"
+      }},
+      "seasonal": {{
+        "current_season": "long_rains",
+        "phase": "planting_window",
+        "advisory": "Optimal time for maize planting"
+      }}
+    }}
+  agent: weather_price_agent
+  context: [classify_query_task]
+
+generate_diagnosis_task:
+  description: >
+    Read COMPLETE MCP context:
+    - Original query: {mcp.query}
+    - Region: {mcp.region}
+    - Asset: {mcp.asset_type} - {mcp.asset_name}
+    - Retrieved knowledge: {mcp.retrieved_context}
+    - Regional data: {mcp.regional_data}
+    
+    SYNTHESIZE a comprehensive response:
+    
+    1. DIAGNOSIS:
+       - What is the issue? (disease, pest, deficiency, etc.)
+       - Severity level (low/medium/high)
+       - Confidence level based on symptoms
+    
+    2. IMMEDIATE ACTIONS:
+       - Step-by-step treatment plan
+       - Required inputs/materials
+       - Timeline for action
+    
+    3. REGIONAL CONTEXT:
+       - How current weather affects the situation
+       - Local availability of solutions
+       - Market implications
+    
+    4. PREVENTIVE MEASURES:
+       - How to avoid this in future
+       - Best practices for the region
+    
+    5. COST ESTIMATE:
+       - Treatment costs
+       - Expected outcomes
+    
+    Make it ACTIONABLE, LOCALIZED, and PRACTICAL for a farmer.
+    Store final diagnosis in MCP.
+    
+  expected_output: >
+    Complete diagnosis stored in MCP with format:
+    "## Diagnosis
+    [Disease/Issue identification]
+    
+    ## Immediate Actions
+    1. [Step 1]
+    2. [Step 2]
+    
+    ## Regional Considerations
+    [Weather/market context]
+    
+    ## Prevention
+    [Future measures]
+    
+    ## Cost
+    [Estimates]"
+    
+  agent: diagnostic_agent
+  context: [retrieve_knowledge_task, fetch_regional_data_task]
+
+check_alerts_task:
+  description: >
+    Read from MCP:
+    - diagnosis: {mcp.diagnosis}
+    - regional_data: {mcp.regional_data}
+    
+    EVALUATE for critical conditions:
+    
+    TRIGGER ALERT if ANY of:
+    1. Severe disease outbreak (e.g., Maize Lethal Necrosis, Fall Armyworm)
+    2. Extreme weather warning in regional_data
+    3. Market price crash > 30% in 7 days
+    4. Pest invasion requiring immediate county response
+    
+    If triggered:
+    1. Call n8n_alert_tool with:
+       - Alert type
+       - Severity
+       - Region
+       - Recommended action
+    2. Mark alert_triggered = true in MCP
+    
+    If not critical:
+    - Return "No alert needed"
+    
+  expected_output: >
+    Alert status:
+    {{
+      "alert_triggered": false,
+      "reason": "Condition within normal parameters"
+    }}
+    OR
+    {{
+      "alert_triggered": true,
+      "alert_type": "disease_outbreak",
+      "severity": "high",
+      "webhook_response": "200 OK"
+    }}
+    
+  agent: action_agent
+  context: [generate_diagnosis_task]
