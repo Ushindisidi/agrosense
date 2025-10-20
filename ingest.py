@@ -21,7 +21,7 @@ load_dotenv()
 
 # configurations
 DOCUMENTS_PATH = os.getenv("DOCUMENTS_PATH", "knowledge")
-INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "agrisense-index")
+INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "agrosense")
 COHERE_MODEL = os.getenv("COHERE_EMBEDDING_MODEL", "embed-english-v3.0")
 EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "1024"))
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1024"))
