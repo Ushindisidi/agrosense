@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --user --no-cache-dir -r requirements.txt
 
 FROM python:3.11-slim
 
@@ -23,14 +23,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/local /usr/local
+COPY --from=builder /root/.local /home/agrosense/.local
+
+RUN chown -R agrosense:agrosense /home/agrosense/.local && \
+    chmod -R 755 /home/agrosense/.local
 
 COPY --chown=agrosense:agrosense . .
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH=/usr/local/bin:$PATH \
-    PORT=8000
+    PATH=/home/agrosense/.local/bin:/usr/local/bin:$PATH \
+    PORT=8000 \
+    CREWAI_STORAGE_DIR=/home/agrosense/.local/share/crewai
 
 USER agrosense
 
