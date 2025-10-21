@@ -11,6 +11,12 @@ import hashlib
 import secrets
 from collections import defaultdict
 import redis
+import gc
+import os
+
+# Memory optimizations for deployment
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+gc.set_threshold(700, 10, 10)  
 
 from src.agrosense.crew import AgroSenseCrew
 from src.agrosense.core.model_router import get_model_for_task, TaskType, model_router
