@@ -50,7 +50,7 @@
                       │   └──────────────────────────────┘   │
                       │   ┌──────────────────────────────┐   │
                       │   │   Model Router               │   │
-                      │   │  (Gemini/GPT/Claude + Fallback)│ │
+                      │   │  (Gemini/Groq/Cohere + Fallback)│ │
                       │   └──────────────────────────────┘   │
                       │   ┌──────────────────────────────┐   │
                       │   │   LangChain Memory           │   │
@@ -90,7 +90,7 @@
   - Google Gemini API
   - Pinecone
   - OpenWeatherMap
-  - (Optional) OpenAI, Anthropic, Cohere
+  -  Gemini, Groq, Cohere
 
 ### **Installation**
 
