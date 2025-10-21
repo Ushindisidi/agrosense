@@ -43,4 +43,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 EXPOSE ${PORT}
 
-CMD ["uvicorn", "src.agrosense.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["uvicorn", "src.agrosense.main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "75"]

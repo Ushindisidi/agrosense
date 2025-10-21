@@ -1584,3 +1584,18 @@ LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
 2025-10-21 09:03:29,705 - src.agrosense.core.model_router - INFO - [INFO] Using groq: groq/llama-3.3-70b-versatile
 2025-10-21 09:03:29,706 - src.agrosense.main - INFO - [OK] Conversational LLM initialized with model router
 2025-10-21 09:03:29,711 - src.agrosense.main - INFO - [INFO] AgroSense API ready!
+2025-10-21 10:00:29,283 - src.agrosense.main - WARNING - [WARN] Redis unavailable. Using in-memory storage (sessions will be lost on restart)
+2025-10-21 10:00:29,335 - src.agrosense.main - INFO - [FARM] Starting AgroSense API v2.2.0...
+2025-10-21 10:00:29,348 - src.agrosense.main - INFO - [INFO] Features: Memory, Security, Fallback Mechanisms
+2025-10-21 10:00:29,360 - src.agrosense.main - INFO - [INFO] Storage: In-Memory
+2025-10-21 10:00:29,361 - src.agrosense.main - INFO - [INFO] AI Providers: Gemini, Groq, Cohere
+2025-10-21 10:00:29,365 - src.agrosense.main - INFO - [FARM] Initializing AgroSense Crew...
+2025-10-21 10:00:37,355 - src.agrosense.core.model_router - INFO - [INFO] Using groq: groq/llama-3.3-70b-versatile
+2025-10-21 10:00:37,366 - src.agrosense.core.model_router - INFO - [INFO] Using cohere: command-r-plus
+2025-10-21 10:00:37,373 - src.agrosense.core.model_router - INFO - [INFO] Using groq: groq/llama-3.3-70b-versatile
+2025-10-21 10:00:37,386 - src.agrosense.core.model_router - INFO - [INFO] Using cohere: command-r-plus
+2025-10-21 10:00:37,401 - src.agrosense.core.model_router - INFO - [INFO] Using groq: groq/llama-3.3-70b-versatile
+2025-10-21 10:00:37,408 - src.agrosense.main - INFO - [OK] Crew initialized successfully
+2025-10-21 10:00:37,414 - src.agrosense.core.model_router - INFO - [INFO] Using groq: groq/llama-3.3-70b-versatile
+2025-10-21 10:00:37,416 - src.agrosense.main - INFO - [OK] Conversational LLM initialized with model router
+2025-10-21 10:00:37,416 - src.agrosense.main - INFO - [INFO] AgroSense API ready!
