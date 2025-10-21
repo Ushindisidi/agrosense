@@ -7,7 +7,7 @@ litellm
 google-generativeai
 cohere
 groq
-pinecone-client
+pinecone
 langchain
 langchain-cohere
 langchain-google-genai

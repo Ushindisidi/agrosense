@@ -12,16 +12,16 @@ import secrets
 from collections import defaultdict
 import redis
 import gc
-import os
+import asyncio
+from functools import lru_cache
+import threading
 
 # Memory optimizations for deployment
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-gc.set_threshold(700, 10, 10)  
+gc.set_threshold(700, 10, 10)
 
-from src.agrosense.crew import AgroSenseCrew
-from src.agrosense.core.model_router import get_model_for_task, TaskType, model_router
-from src.agrosense.core.prompts import PromptLibrary
-from src.agrosense.core.langchain_memory import memory_manager
+# IMPORTANT: Don't import CrewAI at module level - import only when needed
+# from src.agrosense.crew import AgroSenseCrew  # ❌ DON'T DO THIS
 
 import sys
 import codecs
@@ -30,7 +30,7 @@ if sys.platform == "win32":
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, errors='replace')
     sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, errors='replace')
 
-# Setup logging with rotation
+# Setup logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -51,7 +51,7 @@ app = FastAPI(
     redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None
 )
 
-# CORS middleware with security
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
@@ -61,7 +61,7 @@ app.add_middleware(
     max_age=3600
 )
 
-# Initialize Redis for session persistence (fallback to memory)
+# Initialize Redis
 try:
     redis_client = redis.Redis(
         host=os.getenv("REDIS_HOST", "localhost"),
@@ -72,29 +72,292 @@ try:
         socket_connect_timeout=5
     )
     redis_client.ping()
-    logger.info("[OK] Connected to Redis for persistent memory")
+    logger.info("[OK] Connected to Redis")
     USE_REDIS = True
 except:
-    logger.warning("[WARN] Redis unavailable. Using in-memory storage (sessions will be lost on restart)")
+    logger.warning("[WARN] Redis unavailable. Using in-memory storage")
     USE_REDIS = False
 
 # In-memory fallback
 sessions: Dict[str, Dict[str, Any]] = {}
 rate_limit_storage: Dict[str, List[datetime]] = defaultdict(list)
 
-# Initialize crew (singleton)
+# ============================================================================
+# LAZY LOADING IMPLEMENTATION
+# ============================================================================
+
+# Global instances - initialized as None
 crew_instance = None
 conversational_llm = None
+crew_lock = threading.Lock()  # Thread-safe initialization
+llm_lock = threading.Lock()
 
-# Security: Rate limiting configuration
+# Track initialization state
+CREW_INITIALIZING = False
+LLM_INITIALIZING = False
+
+# Constants
 RATE_LIMIT_REQUESTS = 30
-RATE_LIMIT_WINDOW = 60  # seconds
+RATE_LIMIT_WINDOW = 60
 MAX_MESSAGE_LENGTH = 2000
 MAX_SESSION_MESSAGES = 100
-SESSION_TTL = 3600  # 1 hour
+SESSION_TTL = 3600
 
 
-# Security Functions
+def lazy_import_crew():
+    """
+    Lazy import CrewAI modules only when needed.
+    This prevents loading heavy dependencies at startup.
+    """
+    try:
+        from src.agrosense.crew import AgroSenseCrew
+        from src.agrosense.core.model_router import get_model_for_task, TaskType, model_router
+        from src.agrosense.core.prompts import PromptLibrary
+        from src.agrosense.core.langchain_memory import memory_manager
+        
+        return {
+            'AgroSenseCrew': AgroSenseCrew,
+            'get_model_for_task': get_model_for_task,
+            'TaskType': TaskType,
+            'model_router': model_router,
+            'PromptLibrary': PromptLibrary,
+            'memory_manager': memory_manager
+        }
+    except Exception as e:
+        logger.error(f"Failed to import CrewAI modules: {e}")
+        raise
+
+
+@lru_cache(maxsize=1)
+def get_crew_modules():
+    """
+    Cached lazy import - imports only once and caches the result.
+    Using lru_cache ensures thread-safe singleton behavior.
+    """
+    return lazy_import_crew()
+
+
+def get_crew(timeout: int = 30):
+    """
+    Get or create crew instance with lazy loading and timeout protection.
+    
+    Args:
+        timeout: Maximum seconds to wait for initialization
+    """
+    global crew_instance, CREW_INITIALIZING
+    
+    # Fast path: already initialized
+    if crew_instance is not None:
+        return crew_instance
+    
+    # Acquire lock for initialization
+    with crew_lock:
+        # Double-check after acquiring lock
+        if crew_instance is not None:
+            return crew_instance
+        
+        # Check if another thread is initializing
+        if CREW_INITIALIZING:
+            logger.info("Crew initialization in progress, waiting...")
+            # Wait for initialization to complete
+            start_time = datetime.now()
+            while CREW_INITIALIZING and (datetime.now() - start_time).seconds < timeout:
+                import time
+                time.sleep(0.5)
+            
+            if crew_instance is not None:
+                return crew_instance
+            else:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Crew initialization timeout. Please retry."
+                )
+        
+        # Initialize crew
+        CREW_INITIALIZING = True
+        try:
+            logger.info("[LAZY] Loading CrewAI modules...")
+            modules = get_crew_modules()
+            AgroSenseCrew = modules['AgroSenseCrew']
+            
+            logger.info("[LAZY] Initializing AgroSense Crew...")
+            crew_instance = AgroSenseCrew()
+            logger.info("[OK] Crew initialized successfully")
+            
+            return crew_instance
+            
+        except Exception as e:
+            logger.error(f"[ERROR] Failed to initialize crew: {e}", exc_info=True)
+            crew_instance = None  # Reset on failure
+            raise HTTPException(
+                status_code=503,
+                detail=f"Service initialization failed: {str(e)[:100]}"
+            )
+        finally:
+            CREW_INITIALIZING = False
+
+
+def get_conversational_llm(timeout: int = 30):
+    """
+    Get LLM with lazy loading and automatic fallback.
+    
+    Args:
+        timeout: Maximum seconds to wait for initialization
+    """
+    global conversational_llm, LLM_INITIALIZING
+    
+    # Fast path: already initialized
+    if conversational_llm is not None:
+        return conversational_llm
+    
+    with llm_lock:
+        # Double-check after acquiring lock
+        if conversational_llm is not None:
+            return conversational_llm
+        
+        # Check if initializing
+        if LLM_INITIALIZING:
+            logger.info("LLM initialization in progress, waiting...")
+            start_time = datetime.now()
+            while LLM_INITIALIZING and (datetime.now() - start_time).seconds < timeout:
+                import time
+                time.sleep(0.5)
+            
+            if conversational_llm is not None:
+                return conversational_llm
+            else:
+                raise HTTPException(
+                    status_code=503,
+                    detail="LLM initialization timeout. Please retry."
+                )
+        
+        # Initialize LLM
+        LLM_INITIALIZING = True
+        try:
+            logger.info("[LAZY] Loading LLM with model router...")
+            modules = get_crew_modules()
+            get_model_for_task = modules['get_model_for_task']
+            TaskType = modules['TaskType']
+            
+            conversational_llm = get_model_for_task(
+                task_type=TaskType.CONVERSATION,
+                temperature=0.7
+            )
+            logger.info("[OK] Conversational LLM initialized")
+            
+            return conversational_llm
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize LLM: {e}", exc_info=True)
+            conversational_llm = None  # Reset on failure
+            raise HTTPException(
+                status_code=503,
+                detail="AI service temporarily unavailable"
+            )
+        finally:
+            LLM_INITIALIZING = False
+
+
+def get_memory_manager():
+    """Lazy load memory manager"""
+    modules = get_crew_modules()
+    return modules['memory_manager']
+
+
+def get_prompt_library():
+    """Lazy load prompt library"""
+    modules = get_crew_modules()
+    return modules['PromptLibrary']
+
+
+# ============================================================================
+# HEALTH CHECK WITH LAZY STATUS
+# ============================================================================
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check that doesn't trigger initialization.
+    Shows component status without loading them.
+    """
+    crew_status = "initialized" if crew_instance else "not_loaded"
+    llm_status = "initialized" if conversational_llm else "not_loaded"
+    redis_status = "connected" if USE_REDIS else "unavailable"
+    
+    # Get provider status only if model router is loaded
+    provider_status = {}
+    try:
+        if crew_instance or conversational_llm:
+            modules = get_crew_modules()
+            model_router = modules['model_router']
+            provider_status = model_router.get_provider_status()
+    except:
+        provider_status = {"status": "not_loaded"}
+    
+    return {
+        "status": "healthy",
+        "components": {
+            "crew": crew_status,
+            "llm": llm_status,
+            "redis": redis_status,
+            "providers": provider_status
+        },
+        "initialization": {
+            "crew_initializing": CREW_INITIALIZING,
+            "llm_initializing": LLM_INITIALIZING
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@app.get("/")
+async def root():
+    """Root endpoint - no heavy initialization"""
+    return {
+        "status": "healthy",
+        "service": "AgroSense Conversational API",
+        "version": "2.2.0",
+        "features": ["lazy_loading", "memory", "security", "fallback"],
+        "providers": ["Gemini", "Groq", "Cohere"],
+        "note": "Heavy components load on first use"
+    }
+
+
+# ============================================================================
+# WARMUP ENDPOINT (OPTIONAL)
+# ============================================================================
+
+@app.post("/api/v1/warmup")
+async def warmup(background_tasks: BackgroundTasks):
+    """
+    Optional endpoint to pre-initialize heavy components.
+    Can be called by deployment scripts or health checks.
+    """
+    def warmup_task():
+        try:
+            logger.info("[WARMUP] Starting component initialization...")
+            get_crew()
+            get_conversational_llm()
+            logger.info("[WARMUP] All components ready!")
+        except Exception as e:
+            logger.error(f"[WARMUP] Failed: {e}")
+    
+    if crew_instance is None or conversational_llm is None:
+        background_tasks.add_task(warmup_task)
+        return {
+            "message": "Warmup initiated in background",
+            "status": "initializing"
+        }
+    else:
+        return {
+            "message": "All components already initialized",
+            "status": "ready"
+        }
+
+
+# ============================================================================
+# SECURITY & UTILITY FUNCTIONS (unchanged)
+# ============================================================================
 
 def get_client_ip(request: Request) -> str:
     """Get client IP address"""
@@ -109,13 +372,11 @@ def check_rate_limit(client_ip: str) -> bool:
     now = datetime.now()
     cutoff = now - timedelta(seconds=RATE_LIMIT_WINDOW)
     
-    # Clean old requests
     rate_limit_storage[client_ip] = [
         req_time for req_time in rate_limit_storage[client_ip]
         if req_time > cutoff
     ]
     
-    # Check limit
     if len(rate_limit_storage[client_ip]) >= RATE_LIMIT_REQUESTS:
         return False
     
@@ -125,7 +386,6 @@ def check_rate_limit(client_ip: str) -> bool:
 
 def sanitize_input(text: str) -> str:
     """Sanitize user input"""
-    # Remove potential script injections
     dangerous_patterns = ["<script", "javascript:", "onerror=", "onclick="]
     sanitized = text
     for pattern in dangerous_patterns:
@@ -137,8 +397,6 @@ def generate_session_id() -> str:
     """Generate secure session ID"""
     return secrets.token_urlsafe(32)
 
-
-# Session Management with Redis/Memory fallback
 
 def save_session(session_id: str, data: Dict[str, Any]):
     """Save session with fallback"""
@@ -179,45 +437,9 @@ def delete_session(session_id: str):
         logger.error(f"Error deleting session: {e}")
 
 
-def get_crew():
-    """Get or create crew instance with error handling"""
-    global crew_instance
-    if crew_instance is None:
-        try:
-            logger.info("[FARM] Initializing AgroSense Crew...")
-            crew_instance = AgroSenseCrew()
-            logger.info("[OK] Crew initialized successfully")
-        except Exception as e:
-            logger.error(f"[ERROR] Failed to initialize crew: {e}")
-            raise HTTPException(
-                status_code=503,
-                detail="Service temporarily unavailable. Please try again later."
-            )
-    return crew_instance
-
-
-def get_conversational_llm():
-    """Get LLM with automatic fallback using model router"""
-    global conversational_llm
-    if conversational_llm is None:
-        try:
-            # Using model router for intelligent selection and automatic fallback
-            # Tries Gemini → Groq → Cohere based on availability
-            conversational_llm = get_model_for_task(
-                task_type=TaskType.CONVERSATION,
-                temperature=0.7
-            )
-            logger.info("[OK] Conversational LLM initialized with model router")
-        except Exception as e:
-            logger.error(f"Failed to initialize LLM: {e}")
-            raise HTTPException(
-                status_code=503,
-                detail="AI service temporarily unavailable"
-            )
-    return conversational_llm
-
-
-# Request/Response Models with Validation
+# ============================================================================
+# REQUEST/RESPONSE MODELS (unchanged)
+# ============================================================================
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=MAX_MESSAGE_LENGTH)
@@ -246,7 +468,10 @@ class WeatherResponse(BaseModel):
     market_price: str
 
 
-# Error Handler
+# ============================================================================
+# API ENDPOINTS (updated to use lazy loading)
+# ============================================================================
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Global error handler with logging"""
@@ -260,8 +485,6 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Helper Functions with Memory
-
 async def generate_conversational_response(
     message: str, 
     session_data: Optional[Dict[str, Any]] = None
@@ -269,17 +492,16 @@ async def generate_conversational_response(
     """Generate response with conversation memory using Prompt Library"""
     
     try:
+        # Lazy load LLM and modules
         llm = get_conversational_llm()
+        PromptLibrary = get_prompt_library()
         
-        #  Using prompt library 
         messages = PromptLibrary.format_prompt(
             "conversation",
             message=message
         )
         
-        #  Adding conversation history from memory if available
         if session_data and "messages" in session_data:
-            # Insert history after system prompt but before current message
             history = []
             for msg in session_data["messages"][-10:]:
                 history.append({
@@ -287,13 +509,11 @@ async def generate_conversational_response(
                     "content": msg["content"]
                 })
             
-            # Rebuild messages: system + history + current
             messages = [messages[0]] + history + [messages[-1]]
         
         response = llm.call(messages)
         ai_message = response if isinstance(response, str) else str(response)
         
-        # Check readiness
         ready_keywords = [
             "detailed analysis",
             "expert system",
@@ -310,7 +530,6 @@ async def generate_conversational_response(
         
     except Exception as e:
         logger.error(f"Conversation error: {e}")
-        # Fallback response
         return {
             "message": "I apologize, I'm experiencing technical difficulties. Please try rephrasing your question or contact support if the issue persists.",
             "is_ready_for_diagnosis": False
@@ -352,7 +571,6 @@ Use null for missing information."""
         if json_match:
             return json.loads(json_match.group())
         
-        # Fallback: basic extraction
         return {
             "crop_or_livestock": "general crop",
             "region": "Kenya",
@@ -375,9 +593,9 @@ async def run_diagnosis_background(session_id: str, extracted_info: Dict[str, An
     try:
         logger.info(f"[TEST] Starting diagnosis for session {session_id}")
         
+        # Lazy load crew
         crew = get_crew()
         
-        # Build query
         query_parts = []
         if extracted_info.get("issue"):
             query_parts.append(extracted_info["issue"])
@@ -389,14 +607,12 @@ async def run_diagnosis_background(session_id: str, extracted_info: Dict[str, An
         query = ". ".join(query_parts) if query_parts else "General farming advice needed"
         region = extracted_info.get("region", "Kenya")
         
-        # Create MCP session
         crew.mcp_client.create_session(
             session_id=session_id,
             query=query,
             region=region
         )
         
-        # Run crew with timeout protection
         inputs = {
             'query': query,
             'region': region,
@@ -406,7 +622,6 @@ async def run_diagnosis_background(session_id: str, extracted_info: Dict[str, An
         logger.info(f"[START] Running crew for session {session_id}")
         result = crew.crew().kickoff(inputs=inputs)
         
-        # Extract diagnosis
         if hasattr(result, 'raw'):
             diagnosis = result.raw
         elif hasattr(result, 'result'):
@@ -414,10 +629,8 @@ async def run_diagnosis_background(session_id: str, extracted_info: Dict[str, An
         else:
             diagnosis = str(result)
         
-        # Get context
         context = crew.mcp_client.get_context(session_id)
         
-        # Update session
         session_data = get_session(session_id)
         if session_data:
             session_data["diagnosis"] = diagnosis
@@ -440,7 +653,6 @@ async def run_diagnosis_background(session_id: str, extracted_info: Dict[str, An
     except Exception as e:
         logger.error(f"[ERROR] Diagnosis error for session {session_id}: {e}", exc_info=True)
 
-        # Update session with error
         session_data = get_session(session_id)
         if session_data:
             session_data["status"] = "failed"
@@ -456,41 +668,6 @@ We're here to help!"""
             save_session(session_id, session_data)
 
 
-# API Endpoints
-
-@app.get("/")
-async def root():
-    """Health check"""
-    return {
-        "status": "healthy",
-        "service": "AgroSense Conversational API",
-        "features": ["memory", "security", "fallback"],
-        "providers": ["Gemini", "Groq", "Cohere"]
-    }
-
-
-@app.get("/health")
-async def health_check():
-    """Detailed health check"""
-    crew_status = "healthy" if crew_instance else "not_initialized"
-    llm_status = "healthy" if conversational_llm else "not_initialized"
-    redis_status = "connected" if USE_REDIS else "unavailable"
-    
-    #  Get provider status from model router
-    provider_status = model_router.get_provider_status()
-    
-    return {
-        "status": "healthy",
-        "components": {
-            "crew": crew_status,
-            "llm": llm_status,
-            "redis": redis_status,
-            "providers": provider_status
-        },
-        "timestamp": datetime.now().isoformat()
-    }
-
-
 @app.post("/api/v1/chat", response_model=ChatResponse)
 async def chat(
     request: ChatRequest,
@@ -499,7 +676,6 @@ async def chat(
 ):
     """Main chat endpoint with rate limiting and memory"""
     
-    # Rate limiting
     client_ip = get_client_ip(req)
     if not check_rate_limit(client_ip):
         raise HTTPException(
@@ -510,7 +686,6 @@ async def chat(
     try:
         logger.info(f"[CHAT] Chat from {client_ip}: {request.message[:100]}...")
         
-        # Get or create session
         session_id = request.session_id or generate_session_id()
         session_data = get_session(session_id)
         
@@ -524,10 +699,10 @@ async def chat(
                 "client_ip": client_ip
             }
         
-        #  Get or create memory for this session
+        # Lazy load memory manager
+        memory_manager = get_memory_manager()
         memory = memory_manager.get_or_create(session_id)
         
-        # Check message limit
         if len(session_data.get("messages", [])) >= MAX_SESSION_MESSAGES:
             return ChatResponse(
                 message="You've reached the maximum number of messages for this session. Please start a new conversation.",
@@ -535,22 +710,18 @@ async def chat(
                 requires_action=False
             )
         
-        #  Add user message to memory
         memory.add_user_message(request.message)
         
-        # Add user message to session
         session_data["messages"].append({
             "role": "user",
             "content": request.message,
             "timestamp": datetime.now().isoformat()
         })
         
-        # Check if diagnosis is ready
         if session_data.get("status") == "completed" and session_data.get("diagnosis"):
             diagnosis = session_data["diagnosis"]
             logger.info(f"✅ Returning completed diagnosis for session {session_id}")
             
-            # Add AI response to memory
             memory.add_ai_message(diagnosis)
             
             response = ChatResponse(
@@ -569,7 +740,6 @@ async def chat(
             
             return response
         
-        # If processing
         if session_data.get("status") == "processing":
             save_session(session_id, session_data)
             return ChatResponse(
@@ -578,23 +748,19 @@ async def chat(
                 requires_action=False
             )
         
-        # Generate AI response with memory
         ai_response = await generate_conversational_response(
             request.message,
             session_data
         )
         
-        #  Add AI response to memory
         memory.add_ai_message(ai_response["message"])
         
-        # Add AI message to session
         session_data["messages"].append({
             "role": "assistant",
             "content": ai_response["message"],
             "timestamp": datetime.now().isoformat()
         })
         
-        # Check if ready for diagnosis
         if ai_response["is_ready_for_diagnosis"]:
             extracted_info = await extract_information(session_data["messages"])
             logger.info(f"[INFO] Extracted: {extracted_info}")
@@ -603,7 +769,6 @@ async def chat(
             session_data["status"] = "processing"
             save_session(session_id, session_data)
             
-            # Queue diagnosis
             background_tasks.add_task(
                 run_diagnosis_background,
                 session_id,
@@ -617,7 +782,6 @@ async def chat(
                 action_type="diagnosis_started"
             )
         
-        # Save and continue
         save_session(session_id, session_data)
         
         return ChatResponse(
@@ -683,8 +847,12 @@ async def end_session(session_id: str):
     """End and delete session"""
     try:
         delete_session(session_id)
-        #  Also delete memory
-        memory_manager.delete(session_id)
+        # Lazy load memory manager only if needed
+        try:
+            memory_manager = get_memory_manager()
+            memory_manager.delete(session_id)
+        except:
+            pass  # Memory manager not loaded yet
         return {"message": "Session ended", "session_id": session_id}
     except Exception as e:
         logger.error(f"Error ending session: {e}")
@@ -736,7 +904,6 @@ async def get_weather(region: str):
                 market_price=price_str
             )
         
-        # Fallback
         return WeatherResponse(
             temperature=25.0,
             humidity=70.0,
@@ -756,18 +923,50 @@ async def get_weather(region: str):
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize on startup"""
+    """
+    Lightweight startup - NO heavy initialization!
+    Components load on first use.
+    """
     logger.info("[FARM] Starting AgroSense API v2.2.0...")
-    logger.info(f"[INFO] Features: Memory, Security, Fallback Mechanisms")
+    logger.info(f"[INFO] Features: Lazy Loading, Memory, Security, Fallback")
     logger.info(f"[INFO] Storage: {'Redis' if USE_REDIS else 'In-Memory'}")
     logger.info(f"[INFO] AI Providers: Gemini, Groq, Cohere")
+    logger.info("[INFO] ✅ API ready! Heavy components will load on first request.")
+    
+    # Optional: Pre-warm in background (uncomment if needed)
+    # import asyncio
+    # asyncio.create_task(background_warmup())
 
+
+async def background_warmup():
+    """
+    Optional background warmup task.
+    Initializes components after startup completes.
+    """
     try:
+        import asyncio
+        await asyncio.sleep(5)  # Wait 5 seconds after startup
+        logger.info("[WARMUP] Background initialization starting...")
         get_crew()
         get_conversational_llm()
-        logger.info("[INFO] AgroSense API ready!")
+        logger.info("[WARMUP] ✅ All components pre-loaded!")
     except Exception as e:
-        logger.error(f"❌ Startup failed: {e}")
+        logger.warning(f"[WARMUP] Background init failed (non-critical): {e}")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown"""
+    logger.info("[SHUTDOWN] Cleaning up resources...")
+    
+    global crew_instance, conversational_llm
+    crew_instance = None
+    conversational_llm = None
+    
+    # Clear cache
+    get_crew_modules.cache_clear()
+    
+    logger.info("[SHUTDOWN] ✅ Cleanup complete")
 
 
 if __name__ == "__main__":
@@ -776,5 +975,8 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=8000,
-        log_level="info"
+        log_level="info",
+        timeout_keep_alive=75,  # Longer timeout for crew operations
+        limit_concurrency=100,
+        limit_max_requests=10000
     )
