@@ -27,3 +27,6 @@ python-json-logger
 pytest
 pytest-asyncio
 black
+litellm
+google-generativeai
+groq
