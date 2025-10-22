@@ -10,7 +10,7 @@
 - ✅ **Multi-Agent System** (CrewAI) - 5 specialized agents working collaboratively
 - ✅ **RAG Pipeline** - Pinecone vector database with agricultural knowledge
 - ✅ **LangChain Memory** - Context-aware conversations with history
-- ✅ **Model Abstraction** - Intelligent routing between Gemini, GPT, Claude
+- ✅ **Model Abstraction** - Intelligent routing between Gemini, Groq, Cohere
 - ✅ **Fallback Mechanisms** - Automatic failover when services are down
 - ✅ **Prompt Engineering** - Advanced techniques (few-shot, chain-of-thought)
 
